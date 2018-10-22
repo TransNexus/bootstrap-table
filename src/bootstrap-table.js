@@ -1963,6 +1963,19 @@
                 order: params.sortOrder
             };
 
+            if (this.options.pageType === 'dynamic-viewer') {
+                var indexes = {};
+                $.each(this.options.columns, function (i, columns) {
+                    var index = 0;
+                    $.each(columns, function (j, column) {
+                        if (column.field != 0) {
+                            indexes[column.field] = index++;
+                        }
+                    });
+                });
+                params['indexes'] = JSON.stringify(indexes);
+            }
+
             if (this.options.pagination) {
                 params.offset = this.options.pageSize === this.options.formatAllRows() ?
                     0 : this.options.pageSize * (this.options.pageNumber - 1);
