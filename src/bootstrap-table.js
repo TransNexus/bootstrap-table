@@ -1947,6 +1947,12 @@
             request;
 
         if (this.options.pagination) {
+            if (this.options.resetFlag) {
+                this.options.resetFlag = false;
+                this.options.pageNumber = this.options.resetPageNumber;
+                this.options.pageSize = this.options.resetPageSize;
+            }
+
             params.pageSize = this.options.pageSize === this.options.formatAllRows() ?
                 this.options.totalRows : this.options.pageSize;
             params.pageNumber = this.options.pageNumber;
@@ -2882,6 +2888,20 @@
         }
     };
 
+    BootstrapTable.prototype.resetPage = function (number, size) {
+        this.options.resetFlag = true;
+        if (number && (number > 0)) {
+            this.options.resetPageNumber = number;
+        } else {
+            this.options.resetPageNumber = 1;
+        }
+        if (size && (size > 0)) {
+            this.options.resetPageSize = size;
+        } else {
+            this.options.resetPageSize = 10;
+        }
+    };
+
     BootstrapTable.prototype.toggleView = function () {
         this.options.cardView = !this.options.cardView;
         this.initHeader();
@@ -3010,7 +3030,7 @@
         'filterBy',
         'scrollTo',
         'getScrollPosition',
-        'selectPage', 'prevPage', 'nextPage',
+        'selectPage', 'prevPage', 'nextPage', 'resetPage',
         'togglePagination',
         'toggleView',
         'refreshOptions',
