@@ -1317,6 +1317,11 @@
 
         if (this.options.sidePagination !== 'server') {
             this.options.totalRows = data.length;
+        } else if (this.options.unknownRows) {
+            this.options.totalRows = (this.options.pageNumber - 1) * this.options.pageSize + data.length;
+            if (data.length < this.options.pageSize) {
+                this.options.unknownRows = false;
+            }
         }
 
         this.totalPages = 0;
@@ -1336,7 +1341,9 @@
             }
 
             this.totalPages = ~~((this.options.totalRows - 1) / this.options.pageSize) + 1;
-
+            if (this.options.unknownRows) {
+                this.totalPages++;
+            }
             this.options.totalPages = this.totalPages;
         }
         if (this.totalPages > 0 && this.options.pageNumber > this.totalPages) {
@@ -1353,7 +1360,7 @@
             '<div class="pull-' + this.options.paginationDetailHAlign + ' pagination-detail">',
             '<span class="pagination-info">',
             this.options.onlyInfoPagination ? this.options.formatDetailPagination(this.options.totalRows) :
-            this.options.formatShowingRows(this.pageFrom, this.pageTo, this.options.totalRows),
+            this.options.formatShowingRows(this.pageFrom, this.pageTo, this.options.unknownRows ? "more" : this.options.totalRows),
             '</span>');
 
         if (!this.options.onlyInfoPagination) {
@@ -1387,7 +1394,10 @@
             }
 
             $.each(pageList, function (i, page) {
-                if (!that.options.smartDisplay || i === 0 || pageList[i - 1] < that.options.totalRows) {
+                if (!that.options.smartDisplay || i === 0 || 
+                    (that.options.unknownRows && (pageList[i - 1] <= that.options.totalRows)) || 
+                    (!that.options.unknownRows && (pageList[i - 1] < that.options.totalRows)))
+                {
                     var active;
                     if ($allSelected) {
                         active = page === that.options.formatAllRows() ? ' class="active"' : '';
@@ -1502,7 +1512,10 @@
                 if (this.totalPages <= 1) {
                     this.$pagination.find('div.pagination').hide();
                 }
-                if (pageList.length < 2 || this.options.totalRows <= pageList[0]) {
+                if (pageList.length < 2 || 
+                   (this.options.unknownRows && this.options.totalRows < pageList[0]) || 
+                   (!this.options.unknownRows && this.options.totalRows <= pageList[0]))
+                {
                     this.$pagination.find('span.page-list').hide();
                 }
 
@@ -1569,7 +1582,7 @@
 
     BootstrapTable.prototype.onPagePre = function (event) {
         if ((this.options.pageNumber - 1) === 0) {
-            this.options.pageNumber = this.options.totalPages;
+            return;
         } else {
             this.options.pageNumber--;
         }
@@ -1578,7 +1591,7 @@
 
     BootstrapTable.prototype.onPageNext = function (event) {
         if ((this.options.pageNumber + 1) > this.options.totalPages) {
-            this.options.pageNumber = 1;
+            return;
         } else {
             this.options.pageNumber++;
         }
@@ -2380,6 +2393,11 @@
         // #431: support pagination
         if (this.options.sidePagination === 'server') {
             this.options.totalRows = data[this.options.totalField];
+            if (this.options.totalRows === -1) {
+                this.options.unknownRows = true;
+            } else {
+                this.options.unknownRows = false;
+            }
             fixedScroll = data.fixedScroll;
             data = data[this.options.dataField];
         } else if (!$.isArray(data)) { // support fixedScroll
