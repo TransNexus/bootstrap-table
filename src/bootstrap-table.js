@@ -4,6 +4,10 @@
  * https://github.com/wenzhixin/bootstrap-table/
  */
 
+/*
+ * Change to verify build script.
+ */
+
 (function ($) {
     'use strict';
 
