@@ -2005,6 +2005,9 @@
 
         if (!($.isEmptyObject(this.filterColumnsPartial))) {
             params.filter = JSON.stringify(this.filterColumnsPartial, null);
+            this.options.filterParams= params.filter;
+        } else {
+            delete this.options.filterParams;
         }
 
         data = calculateObjectValue(this.options, this.options.queryParams, [params], data);
